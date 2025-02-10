@@ -525,7 +525,7 @@ again:
 	up_read(&conn_list_lock);
 
 	if (!list_empty(&conn_list)) {
-		msleep(100);
+		schedule_timeout_interruptible(HZ / 10); /* 100ms */
 		goto again;
 	}
 }
