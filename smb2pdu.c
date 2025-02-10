@@ -2940,7 +2940,7 @@ int smb2_open(struct ksmbd_work *work)
 	__le32 *next_ptr = NULL;
 	int req_op_level = 0, open_flags = 0, may_flags = 0, file_info = 0;
 	int rc = 0;
-	int contxt_cnt = 0, query_disk_id = 0;
+	int contxt_cnt = 0, query_disk_id = 0, aapl_ctxt = 0;
 	int maximal_access_ctxt = 0, posix_ctxt = 0;
 	int s_type = 0;
 	int next_off = 0;
@@ -3140,6 +3140,16 @@ int smb2_open(struct ksmbd_work *work)
 			ksmbd_debug(SMB,
 				    "get query maximal access context\n");
 			maximal_access_ctxt = 1;
+		}
+
+        	context = smb2_find_context_vals(req, 
+						SMB2_CREATE_TAG_AAPL, 4);
+		if (IS_ERR(context)) {
+			rc = PTR_ERR(context);
+			goto err_out2;
+		} else if (context) {
+			ksmbd_debug(SMB, "get AAPL context\n"); 
+			aapl_ctxt = 1;
 		}
 
 		context = smb2_find_context_vals(req,
@@ -3803,6 +3813,26 @@ reconnected_fp:
 			*next_ptr = cpu_to_le32(next_off);
 		next_ptr = &mxac_ccontext->Next;
 		next_off = conn->vals->create_mxac_size;
+	}
+
+	if (aapl_ctxt) {
+		struct create_context *aapl_ccontext;
+		aapl_ccontext = (struct create_context *)(rsp->Buffer +
+			le32_to_cpu(rsp->CreateContextsLength));
+		contxt_cnt++;
+
+		uint64_t s_caps = 0x0000000000000001; 
+		uint64_t v_caps = 0x0000000000000000;
+		create_aapl_rsp_buf(rsp->Buffer + le32_to_cpu(rsp->CreateContextsLength), s_caps, v_caps);
+
+		le32_add_cpu(&rsp->CreateContextsLength, conn->vals->create_aapl_size);
+		iov_len += conn->vals->create_aapl_size;
+
+		if (next_ptr)
+			*next_ptr = cpu_to_le32(next_off);
+		
+		next_ptr = &aapl_ccontext->Next;
+		next_off = conn->vals->create_aapl_size;
 	}
 
 	if (query_disk_id) {

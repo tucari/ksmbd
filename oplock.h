@@ -123,6 +123,7 @@ int lease_read_to_write(struct oplock_info *opinfo);
 void create_durable_rsp_buf(char *cc);
 void create_durable_v2_rsp_buf(char *cc, struct ksmbd_file *fp);
 void create_mxac_rsp_buf(char *cc, int maximal_access);
+void create_aapl_rsp_buf(char *cc, int server_caps, int vol_caps);
 void create_disk_id_rsp_buf(char *cc, __u64 file_id, __u64 vol_id);
 void create_posix_rsp_buf(char *cc, struct ksmbd_file *fp);
 struct create_context *smb2_find_context_vals(void *open_req, const char *tag, int tag_len);

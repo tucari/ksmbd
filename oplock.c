@@ -1910,6 +1910,42 @@ void create_mxac_rsp_buf(char *cc, int maximal_access)
 	buf->MaximalAccess = cpu_to_le32(maximal_access);
 }
 
+void create_aapl_rsp_buf(char *cc, int server_caps, int vol_caps)
+{
+	struct create_aapl_rsp *buf;
+   
+	buf = (struct create_aapl_rsp *)cc;
+	memset(buf, 0, sizeof(struct create_aapl_rsp));
+
+	buf->ccontext.DataOffset = cpu_to_le16(offsetof(struct create_aapl_rsp, Command));
+	buf->ccontext.DataLength = cpu_to_le32(60);
+	buf->ccontext.NameOffset = cpu_to_le16(offsetof(struct create_aapl_rsp, Name));
+	buf->ccontext.NameLength = cpu_to_le16(4);
+
+	/* "AAPL" */
+	buf->Name[0] = 'A';
+	buf->Name[1] = 'A'; 
+	buf->Name[2] = 'P';
+	buf->Name[3] = 'L';
+
+	buf->Command = cpu_to_le32(SMB2_CRTCTX_AAPL_SERVER_QUERY);
+	buf->RequestBitmap = cpu_to_le64(0xFFFFFFFFFFFFFFFF);  
+	buf->ServerCaps = server_caps;
+	buf->VolumeCaps = vol_caps;
+	buf->Reserved3 = cpu_to_le32(1); // have model info
+	char *model = "MacKSMBD";  
+	size_t model_len = strlen(model);
+    size_t model_utf16_len = model_len * 2;  
+
+    buf->ModelLen = cpu_to_le32(model_utf16_len);
+
+    for (size_t i = 0; i < model_len; i++) {
+        buf->Model[i] = cpu_to_le16((uint16_t)model[i]);  
+    }
+	buf->Model[model_len] = cpu_to_le16(0x0000); // null term
+
+}
+
 void create_disk_id_rsp_buf(char *cc, __u64 file_id, __u64 vol_id)
 {
 	struct create_disk_id_rsp *buf;

@@ -265,6 +265,22 @@ struct preauth_integrity_info {
 #define SMB2_SIGNING_CAPABILITIES		cpu_to_le16(8)
 #define SMB2_POSIX_EXTENSIONS_AVAILABLE		cpu_to_le16(0x100)
 
+#define SMB2_CRTCTX_AAPL_SERVER_QUERY 1
+#define SMB2_CRTCTX_AAPL_RESOLVE_ID   2
+
+#define SMB2_CRTCTX_AAPL_SERVER_CAPS 1
+#define SMB2_CRTCTX_AAPL_VOLUME_CAPS 2
+#define SMB2_CRTCTX_AAPL_MODEL_INFO  4
+
+#define SMB2_CRTCTX_AAPL_SUPPORTS_READ_DIR_ATTR 1
+#define SMB2_CRTCTX_AAPL_SUPPORTS_OSX_COPYFILE  2
+#define SMB2_CRTCTX_AAPL_UNIX_BASED             4
+#define SMB2_CRTCTX_AAPL_SUPPORTS_NFS_ACE       8
+
+#define SMB2_CRTCTX_AAPL_SUPPORT_RESOLVE_ID 1
+#define SMB2_CRTCTX_AAPL_CASE_SENSITIVE     2
+#define SMB2_CRTCTX_AAPL_FULL_SYNC          4
+
 struct smb2_neg_context {
 	__le16  ContextType;
 	__le16  DataLength;
@@ -575,6 +591,7 @@ struct smb2_tree_disconnect_rsp {
 #define SMB2_CREATE_DURABLE_HANDLE_RECONNECT	"DHnC"
 #define SMB2_CREATE_ALLOCATION_SIZE		"AlSi"
 #define SMB2_CREATE_QUERY_MAXIMAL_ACCESS_REQUEST "MxAc"
+#define SMB2_CREATE_TAG_AAPL "AAPL"
 #define SMB2_CREATE_TIMEWARP_REQUEST		"TWrp"
 #define SMB2_CREATE_QUERY_ON_DISK_ID		"QFid"
 #define SMB2_CREATE_REQUEST_LEASE		"RqLs"
@@ -691,6 +708,20 @@ struct create_mxac_req {
 	__u8   Name[8];
 	__le64 Timestamp;
 } __packed;
+
+struct create_aapl_rsp {
+   	struct create_context ccontext;
+   	 __u8  Name[4];         
+    	__le32  Reserved1;
+    	__le32  Command;        
+	__le32  Reserved2;
+    	__le64  RequestBitmap;   
+   	 __le64  ServerCaps;     
+    	__le64  VolumeCaps;      
+   	 __le32  Reserved3;
+    	__le32  ModelLen;        
+    	__le16  Model[10];         
+} 	__packed;
 
 struct create_alloc_size_req {
 	struct create_context ccontext;
