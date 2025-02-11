@@ -4468,7 +4468,7 @@ static int __query_dir(struct dir_context *ctx, const char *name, int namlen,
 #else
 		return 0;
 #endif
-	d_info->num_scan++;
+	
 	if (ksmbd_share_veto_filename(priv->work->tcon->share_conf, name))
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
 		return true;
@@ -4481,7 +4481,7 @@ static int __query_dir(struct dir_context *ctx, const char *name, int namlen,
 #else
 		return 0;
 #endif
-
+	d_info->num_scan++;
 	d_info->name		= name;
 	d_info->name_len	= namlen;
 	rc = reserve_populate_dentry(d_info, priv->info_level);
